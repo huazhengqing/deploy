@@ -1,0 +1,575 @@
+#######################################################
+# fabric
+
+mkdir -p $GOPATH/src/github.com/hyperledger
+cd $GOPATH/src/github.com/hyperledger
+
+git clone     https://github.com/hyperledger/fabric.git
+git clone     https://github.com/yeasy/docker-compose-files.git    
+
+cd $GOPATH/src/github.com/hyperledger/fabric
+git remote -v
+git branch -a
+git tag
+git status
+git checkout release-1.1
+
+make release
+
+sudo mkdir -p  /etc/hyperledger/fabric/
+sudo chown -R dev.dev /etc/hyperledger
+cd $GOPATH/src/github.com/hyperledger/fabric/sampleconfig/
+cp *.yaml   /etc/hyperledger/fabric/
+
+
+#######################################################
+# fabric peer
+
+peer [flags]
+peer [command]
+  chaincode   Operate a chaincode: install|instantiate|invoke|package|query|signpackage|upgrade|list.
+  channel     Operate a channel: create|fetch|join|list|update|signconfigtx|getinfo.
+  logging     Log levels: getlevel|setlevel|revertlevels.
+  node        Operate a peer node: start|status.
+  version     Print fabric peer version.
+
+peer channel [command]
+  create       Create a channel
+  fetch        Fetch a block
+  getinfo      get blockchain information of a specified channel.
+  join         Joins the peer to a channel.
+  list         List of channels peer has joined.
+  signconfigtx Signs a configtx update.
+  update       Send a configtx update.
+peer chaincode [command]
+  install     Package the specified chaincode into a deployment spec and save it on the peer's path.
+  instantiate Deploy the specified chaincode to the network.
+  invoke      Invoke the specified chaincode.
+  list        Get the instantiated chaincodes on a channel or installed chaincodes on a peer.
+  package     Package the specified chaincode into a deployment spec.
+  query       Query using the specified chaincode.
+  signpackage Sign the specified chaincode package
+  upgrade     Upgrade chaincode.
+
+      --cafile string                       Path to file containing PEM-encoded trusted certificate(s) for the ordering endpoint
+      --certfile string                     Path to file containing PEM-encoded X509 public key to use for mutual TLS communication with the orderer endpoint
+      --clientauth                          Use mutual TLS when communicating with the orderer endpoint
+  -h, --help                                help for chaincode
+      --keyfile string                      Path to file containing PEM-encoded private key to use for mutual TLS communication with the orderer endpoint
+  -o, --orderer string                      Ordering service endpoint
+      --ordererTLSHostnameOverride string   The hostname override to use when validating the TLS connection to the orderer.
+      --tls                                 Use TLS when communicating with the orderer endpoint
+      --transient string                    Transient map of arguments in JSON encoding
+
+
+#######################################################
+# configtxgen
+
+configtxgen:
+  -asOrg string
+    	Performs the config generation as a particular organization (by name), only including values in the write set that org (likely) has privilege to set
+  -channelID string
+    	The channel ID to use in the configtx (default "testchainid")
+  -inspectBlock string
+    	Prints the configuration contained in the block at the specified path
+  -inspectChannelCreateTx string
+    	Prints the configuration contained in the transaction at the specified path
+  -outputAnchorPeersUpdate string
+    	Creates an config update to update an anchor peer (works only with the default channel creation, and only for the first update)
+  -outputBlock string
+    	The path to write the genesis block to (if set)
+  -outputCreateChannelTx string
+    	The path to write a channel creation configtx to (if set)
+  -printOrg string
+    	Prints the definition of an organization as JSON. (useful for adding an org to a channel manually)
+  -profile string
+    	The profile from configtx.yaml to use for generation. (default "SampleInsecureSolo")
+  -version
+    	Show version information
+
+
+#######################################################
+# fabric-ca 
+
+cd $GOPATH/src/github.com/hyperledger
+git clone     https://github.com/hyperledger/fabric-ca.git
+
+cd $GOPATH/src/github.com/hyperledger/fabric-ca/
+make release
+make dist
+
+#######################################################
+# fabric-ca-server
+
+fabric-ca-server [command]
+  init        Initialize the fabric-ca server
+  start       Start the fabric-ca server
+  version     Prints Fabric CA Server version
+      --address string                            Listening address of fabric-ca-server (default "0.0.0.0")
+  -b, --boot string                               The user:pass for bootstrap admin which is required to build default config file
+      --ca.certfile string                        PEM-encoded CA certificate file (default "ca-cert.pem")
+      --ca.chainfile string                       PEM-encoded CA chain file (default "ca-chain.pem")
+      --ca.keyfile string                         PEM-encoded CA key file
+  -n, --ca.name string                            Certificate Authority name
+      --cacount int                               Number of non-default CA instances
+      --cafiles stringSlice                       A list of comma-separated CA configuration files
+      --cfg.affiliations.allowremove              Enables removal of affiliations dynamically
+      --cfg.identities.allowremove                Enables removal of identities dynamically
+      --crl.expiry duration                       Expiration for the CRL generated by the gencrl request (default 24h0m0s)
+      --crlsizelimit int                          Size limit of an acceptable CRL in bytes (default 512000)
+      --csr.cn string                             The common name field of the certificate signing request to a parent fabric-ca-server
+      --csr.hosts stringSlice                     A list of space-separated host names in a certificate signing request to a parent fabric-ca-server
+      --csr.serialnumber string                   The serial number in a certificate signing request to a parent fabric-ca-server
+      --db.datasource string                      Data source which is database specific (default "fabric-ca-server.db")
+      --db.tls.certfiles stringSlice              A list of comma-separated PEM-encoded trusted certificate files (e.g. root1.pem,root2.pem)
+      --db.tls.client.certfile string             PEM-encoded certificate file when mutual authenticate is enabled
+      --db.tls.client.keyfile string              PEM-encoded key file when mutual authentication is enabled
+      --db.type string                            Type of database; one of: sqlite3, postgres, mysql (default "sqlite3")
+  -d, --debug                                     Enable debug level logging
+  -H, --home string                               Server's home directory (default ".")
+      --intermediate.enrollment.label string      Label to use in HSM operations
+      --intermediate.enrollment.profile string    Name of the signing profile to use in issuing the certificate
+      --intermediate.parentserver.caname string   Name of the CA to connect to on fabric-ca-server
+  -u, --intermediate.parentserver.url string      URL of the parent fabric-ca-server (e.g. http://<username>:<password>@<address>:<port)
+      --intermediate.tls.certfiles stringSlice    A list of comma-separated PEM-encoded trusted certificate files (e.g. root1.pem,root2.pem)
+      --intermediate.tls.client.certfile string   PEM-encoded certificate file when mutual authenticate is enabled
+      --intermediate.tls.client.keyfile string    PEM-encoded key file when mutual authentication is enabled
+      --ldap.attribute.names stringSlice          The names of LDAP attributes to request on an LDAP search
+      --ldap.enabled                              Enable the LDAP client for authentication and attributes
+      --ldap.groupfilter string                   The LDAP group filter for a single affiliation group (default "(memberUid=%s)")
+      --ldap.tls.certfiles stringSlice            A list of comma-separated PEM-encoded trusted certificate files (e.g. root1.pem,root2.pem)
+      --ldap.tls.client.certfile string           PEM-encoded certificate file when mutual authenticate is enabled
+      --ldap.tls.client.keyfile string            PEM-encoded key file when mutual authentication is enabled
+      --ldap.url string                           LDAP client URL of form ldap://adminDN:adminPassword@host[:port]/base
+      --ldap.userfilter string                    The LDAP user filter to use when searching for users (default "(uid=%s)")
+  -p, --port int                                  Listening port of fabric-ca-server (default 7054)
+      --registry.maxenrollments int               Maximum number of enrollments; valid if LDAP not enabled (default -1)
+      --tls.certfile string                       PEM-encoded TLS certificate file for server's listening port (default "tls-cert.pem")
+      --tls.clientauth.certfiles stringSlice      A list of comma-separated PEM-encoded trusted certificate files (e.g. root1.pem,root2.pem)
+      --tls.clientauth.type string                Policy the server will follow for TLS Client Authentication. (default "noclientcert")
+      --tls.enabled                               Enable TLS on the listening port
+      --tls.keyfile string                        PEM-encoded TLS key for server's listening port
+
+#######################################################
+# fabric-ca-client
+
+fabric-ca-client [command]
+  affiliation Manage affiliations
+  enroll      Enroll an identity
+  gencrl      Generate a CRL
+  gencsr      Generate a CSR
+  getcacert   Get CA certificate chain
+  identity    Manage identities
+  reenroll    Reenroll an identity
+  register    Register an identity
+  revoke      Revoke an identity
+  version     Prints Fabric CA Client version
+      --caname string                  Name of CA
+      --csr.cn string                  The common name field of the certificate signing request
+      --csr.hosts stringSlice          A list of space-separated host names in a certificate signing request
+      --csr.names stringSlice          A list of comma-separated CSR names of the form <name>=<value> (e.g. C=CA,O=Org1)
+      --csr.serialnumber string        The serial number in a certificate signing request
+  -d, --debug                          Enable debug level logging
+      --enrollment.attrs stringSlice   A list of comma-separated attribute requests of the form <name>[:opt] (e.g. foo,bar:opt)
+      --enrollment.label string        Label to use in HSM operations
+      --enrollment.profile string      Name of the signing profile to use in issuing the certificate
+  -H, --home string                    Client's home directory (default "/home/dev/.fabric-ca-client")
+      --id.affiliation string          The identity's affiliation
+      --id.attrs stringSlice           A list of comma-separated attributes of the form <name>=<value> (e.g. foo=foo1,bar=bar1)
+      --id.maxenrollments int          The maximum number of times the secret can be reused to enroll (default CA's Max Enrollment)
+      --id.name string                 Unique name of the identity
+      --id.secret string               The enrollment secret for the identity being registered
+      --id.type string                 Type of identity being registered (e.g. 'peer, app, user') (default "client")
+  -M, --mspdir string                  Membership Service Provider directory (default "msp")
+  -m, --myhost string                  Hostname to include in the certificate signing request during enrollment (default "ubuntu-dev")
+  -a, --revoke.aki string              AKI (Authority Key Identifier) of the certificate to be revoked
+  -e, --revoke.name string             Identity whose certificates should be revoked
+  -r, --revoke.reason string           Reason for revocation
+  -s, --revoke.serial string           Serial number of the certificate to be revoked
+      --tls.certfiles stringSlice      A list of comma-separated PEM-encoded trusted certificate files (e.g. root1.pem,root2.pem)
+      --tls.client.certfile string     PEM-encoded certificate file when mutual authenticate is enabled
+      --tls.client.keyfile string      PEM-encoded key file when mutual authentication is enabled
+  -u, --url string                     URL of fabric-ca-server (default "http://localhost:7054")
+
+
+#######################################################
+# fabric examples  e2e_cli
+
+cd $GOPATH/src/github.com/hyperledger/fabric/
+git checkout v1.0.0-beta
+
+cd $GOPATH/src/github.com/hyperledger/fabric/
+cd ./examples/e2e_cli
+source download-dockerimages.sh
+
+rm -rf ./var
+
+mkdir -p ./var/ordererOrganizations/example.com/orderers/orderer.example.com/
+mkdir -p ./var/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/
+mkdir -p ./var/peerOrganizations/org1.example.com/peers/peer1.org1.example.com/
+mkdir -p ./var/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/
+mkdir -p ./var/peerOrganizations/org2.example.com/peers/peer1.org2.example.com/
+
+./network_setup.sh up
+
+./network_setup.sh down
+
+docker exec -it cli bash 
+cd /opt/gopath/src/github.com/hyperledger/fabric/
+ls -lR
+
+peer channel create|fetch|update|join|list
+peer channel fetch config -b mychannel.block   outfile
+peer channel fetch newest -b mychannel.block   outfile
+peer channel list 
+
+
+
+
+docker exec -it peer0.org1.example.com bash 
+docker exec -it peer1.org1.example.com bash 
+docker exec -it peer0.org2.example.com bash 
+docker exec -it peer1.org2.example.com bash 
+cd /opt/gopath/src/github.com/hyperledger/fabric/peer/
+ls -lR
+cd /var/hyperledger/
+ls -lR
+cd /etc/hyperledger/fabric/
+ls -lR
+
+docker exec -it orderer.example.com bash 
+cd /opt/gopath/src/github.com/hyperledger/fabric/peer/
+ls -lR
+cd /var/hyperledger/
+ls -lR
+cd /etc/hyperledger/fabric/
+ls -lR
+
+
+#######################################################
+# fabric  configtxlator
+
+./configtxlator start &
+
+cd $GOPATH/src/github.com/hyperledger/fabric/
+cd ./examples/e2e_cli
+cd ./channel-artifacts/
+curl -X POST --data-binary @genesis.block http://127.0.0.1:7059/protolator/decode/common.Block > genesis.json
+curl -X POST --data-binary @channel.tx http://127.0.0.1:7059/protolator/decode/common.Envelope > channel.json
+curl -X POST --data-binary @Org1MSPanchors.tx http://127.0.0.1:7059/protolator/decode/common.Envelope > Org1MSPanchors.json
+curl -X POST --data-binary @Org2MSPanchors.tx http://127.0.0.1:7059/protolator/decode/common.Envelope > Org2MSPanchors.json
+
+
+
+curl -X POST --data-binary @blockfile_000000 http://127.0.0.1:7059/protolator/decode/common.Block > blockfile_000000.json
+curl -X POST --data-binary @channel.json http://127.0.0.1:7059/protolator/encode/common.ConfigUpdate > channel2.tx
+
+
+
+#######################################################
+# hyperledger composer
+
+cd $GOPATH/src/github.com/hyperledger/
+git clone   https://github.com/hyperledger/composer.git
+
+npm uninstall -g composer-cli
+npm uninstall -g composer-rest-server
+npm uninstall -g generator-hyperledger-composer
+
+npm install -g composer-cli
+npm install -g composer-rest-server
+npm install -g generator-hyperledger-composer
+npm install -g yo
+npm install -g composer-playground
+
+
+#######################################################
+# composer
+
+composer archive <subcommand>      Composer archive command
+composer card <subcommand>         Command for managing business network cards
+composer generator <subcommand>    Composer generator command to convert a Business Network Definition to code
+composer identity <subcommand>     Composer identity command
+composer network <subcommand>      Composer network command
+composer participant <subcommand>  Composer participant command
+composer report                    Command for creating a report of the current Composer environment
+composer transaction <subcommand>  Composer transaction command
+
+composer network download [options]  Downloads a business network from the Hyperledger Fabric, does not undeploy
+composer network install [options]   Installs a business network archive to Hyperledger Fabric
+composer network list [options]      List the contents of a business network
+composer network loglevel [options]  Change the logging level of a business network
+composer network ping [options]      Test a connection to a business network
+composer network reset [options]     Resets a business network
+composer network start [options]     Starts a specific version of a business network that is already installed to Hyperledger Fabric
+composer network upgrade [options]   Upgrades to a specific version of a business network that is already installed to Hyperledger Fabric
+
+composer identity bind [options]     Bind an existing identity to a participant in a participant registry
+composer identity issue [options]    Issue a new identity to a participant in a participant registry
+composer identity list [options]     List all identities in a business network
+composer identity request [options]  Request an identity's certificate and key
+composer identity revoke [options]   Revoke an identity that was issued or bound to a participant
+
+composer card create [options]  Creates a business network card from individual components
+composer card delete [options]  Delete a business network card
+composer card export [options]  Export a business network card
+composer card import [options]  Import a business network card
+composer card list              List all business network cards
+
+composer participant add [options]  Add a new participant to a participant registry
+
+composer transaction submit [options]  Submit a transaction to a business network
+
+
+composer identity issue [options]
+--help               显示帮助信息  [布尔]
+-v, --version        显示版本号  [布尔]
+--newUserId, -u      The user ID for the new identity  [字符串]
+--participantId, -a  The participant to issue the new identity to  [字符串] [必需]
+--issuer, -x         If the new identity should be able to issue other new identities  [布尔]
+--option, -o         Options that are specific specific to connection. Multiple options are specified by repeating this option  [字符串]
+--optionsFile, -O    A file containing options that are specific to connection  [字符串]
+--card, -c           Name of the network card to use for issuing  [字符串]
+--file, -f           The card file name for the new identity  [字符串]
+
+
+composer participant add -c admin@network -d '{"$class":"net.biz.digitalPropertyNetwork.Person","personId":"mae@biznet.org","firstName":"Mae","lastName":"Smith"}'
+
+composer identity issue -c admin@network -f maeid1.card -u maeid1 -a "resource:net.biz.digitalPropertyNetwork.Person#mae@biznet.org"
+composer card import -f maeid1@network.card
+composer network ping -c maeid1@network
+
+composer identity bind -c admin@digitalPropertyNetwork -a "resource:net.biz.digitalPropertyNetwork.Person#mae@biznet.org"
+composer network ping -c admin@digitalPropertyNetwork
+
+
+#######################################################
+# business network
+
+yo hyperledger-composer:businessnetwork
+
+
+composer network install -c PeerAdmin@hlfv1 -a dist/iot-perishable-network-advanced.bna 
+composer network start -c PeerAdmin@hlfv1 -A admin -S adminpw -n iot-perishable-network-advanced -V 0.1.13 -f networkadmin.card
+composer network upgrade -c admin@iot-perishable-network-advanced -n iot-perishable-network-advanced -V 0.1.13
+composer card import -f networkadmin.card
+composer network list -c admin@iot-perishable-network-advanced
+composer network ping -c admin@iot-perishable-network-advanced
+composer-rest-server -c admin@iot-perishable-network-advanced
+composer card list
+composer transaction submit -c admin@iot-perishable-network-advanced -d '{"$class": "org.acme.shipping.perishable.SetupDemo"}'
+composer network list -c admin@iot-perishable-network-advanced
+
+
+composer identity list -c admin@iot-perishable-network-advanced
+composer identity issue -c admin@iot-perishable-network-advanced -f grower1.card -u grower1 -a 'resource:org.acme.shipping.perishable.Grower#farmer@email.com'
+composer card import -f grower1.card
+composer identity issue -c admin@iot-perishable-network-advanced -f shipper1.card -u shipper1 -a 'resource:org.acme.shipping.perishable.Shipper#shipper@email.com'
+composer card import -f shipper1.card
+composer identity issue -c admin@iot-perishable-network-advanced --file importer1.card --newUserId importer1 --participantId 'resource:org.acme.shipping.perishable.Importer#supermarket@email.com'
+composer card import -f importer1.card
+composer identity issue -c admin@iot-perishable-network-advanced --file sensor_temp1.card --newUserId sensor_temp1 --participantId 'resource:org.acme.shipping.perishable.TemperatureSensor#SENSOR_TEMP001'
+composer card import -f sensor_temp1.card
+composer identity issue -c admin@iot-perishable-network-advanced --file sensor_gps1.card --newUserId sensor_gps1 --participantId 'resource:org.acme.shipping.perishable.GpsSensor#SENSOR_GPS001'
+composer card import -f sensor_gps1.card
+
+
+
+composer transaction submit -c grower1@iot-perishable-network-advanced -d  '{"$class": "org.acme.shipping.perishable.ShipmentPacked", "shipment": "resource:org.acme.shipping.perishable.Shipment#SHIP_001"}'
+
+composer transaction submit -c shipper1@iot-perishable-network-advanced -d '{"$class": "org.acme.shipping.perishable.ShipmentPickup", "shipment": "resource:org.acme.shipping.perishable.Shipment#SHIP_001"}'
+composer transaction submit -c shipper1@iot-perishable-network-advanced -d '{"$class": "org.acme.shipping.perishable.ShipmentLoaded", "shipment": "resource:org.acme.shipping.perishable.Shipment#SHIP_001"}'
+
+composer transaction submit -c sensor_temp1@iot-perishable-network-advanced -d '{ "$class": "org.acme.shipping.perishable.TemperatureReading", "centigrade": 2, "shipment": "resource:org.acme.shipping.perishable.Shipment#SHIP_001"}'
+composer transaction submit -c sensor_temp1@iot-perishable-network-advanced -d '{ "$class": "org.acme.shipping.perishable.TemperatureReading", "centigrade": 3, "shipment": "resource:org.acme.shipping.perishable.Shipment#SHIP_001"}'
+composer transaction submit -c sensor_temp1@iot-perishable-network-advanced -d '{ "$class": "org.acme.shipping.perishable.TemperatureReading", "centigrade": 11, "shipment": "resource:org.acme.shipping.perishable.Shipment#SHIP_001"}'
+
+composer transaction submit -c sensor_gps1@iot-perishable-network-advanced -d '{"$class": "org.acme.shipping.perishable.GpsReading", "readingTime": "2200", "readingDate": "20180412", "latitude": "40.6840", "latitudeDir": "N", "longitude": "74.0062", "longitudeDir": "W", "shipment": "resource:org.acme.shipping.perishable.Shipment#SHIP_001"}' 
+
+composer transaction submit -c importer1@iot-perishable-network-advanced -d '{"$class": "org.acme.shipping.perishable.ShipmentReceived", "shipment": "resource:org.acme.shipping.perishable.Shipment#SHIP_001"}'
+
+
+
+/home/dev/test/test/dist/test.bna
+
+
+composer network install --card PeerAdmin@byfn-network-org1 --archiveFile test.bna
+composer network start -c PeerAdmin@byfn-network-org1 -A admin -S adminpw -n test -V 0.0.1 -f networkadmin@byfn-network-org1.card
+
+
+
+#######################################################
+# hyperledger composer-playground
+
+composer-playground
+
+docker run --name composer-playground --publish 8080:8080 hyperledger/composer-playground
+http://localhost:8080
+
+#######################################################
+# hyperledger composer angular
+
+yo hyperledger-composer:angular
+
+npm start
+
+
+
+#######################################################
+# composer-rest-server
+
+-c, --card            The name of the business network card to use  [string]
+-n, --namespaces      Use namespaces if conflicting types exist  [string] [choices: "always", "required", "never"] [default: "always"]
+-p, --port            The port to serve the REST API on  [number]
+-a, --authentication  Enable authentication for the REST API using Passport  [boolean] [default: false]
+-m, --multiuser       Enable multiple user and identity management using wallets (implies -a)  [boolean] [default: false]
+-w, --websockets      Enable event publication over WebSockets  [boolean] [default: true]
+-t, --tls             Enable TLS security for the REST API  [boolean] [default: false]
+-e, --tlscert         File containing the TLS certificate  [string] [default: "/usr/local/lib/node_modules/composer-rest-server/cert.pem"]
+-k, --tlskey          File containing the TLS private key  [string] [default: "/usr/local/lib/node_modules/composer-rest-server/key.pem"]
+-h, --help            Show help  [boolean]
+-v, --version         Show version number  [boolean]
+
+
+cnpm install -g wscat
+$ wscat -c ws://localhost:3000
+connected (press CTRL+C to quit)
+< {"$class":"org.acme.sample.SampleEvent","asset":"resource:org.acme.sample.SampleAsset#assetId:1","oldValue":"","newValue":"hello world","eventId":"a80d220b-09db-4812-b04b-d5d03b663671#0","timestamp":"2017-08-23T12:47:17.685Z"}
+>
+
+
+cnpm install -g passport-github
+export COMPOSER_PROVIDERS='{
+  "github": {
+    "provider": "github",
+    "module": "passport-github",
+    "clientID": "b2fd26644a3541f52709",
+    "clientSecret": "4c2d455f401ef2869016c3a35c7e99240b134149",
+    "authPath": "/auth/github",
+    "callbackURL": "/auth/github/callback",
+    "successRedirect": "/",
+    "failureRedirect": "/"
+  }
+}'
+composer-rest-server -c admin@my-network -a true
+curl -v http://localhost:3000/api/system/ping?access_token=xxxxx
+curl -v -H 'X-Access-Token: xxxxx' http://localhost:3000/api/system/ping
+
+
+composer-rest-server -c alice1@my-network -t -e /tmp/cert.pem -k /tmp/key.pem
+
+
+npm install -g loopback-connector-mongodb
+
+FROM hyperledger/composer-rest-server
+RUN npm install --production loopback-connector-mongodb passport-github && \
+    npm cache clean --force && \
+    ln -s node_modules .node_modules
+docker build -t myorg/my-composer-rest-server .
+
+docker run -d --name mongo --network composer_default -p 27017:27017 mongo
+
+COMPOSER_CARD=admin@my-network
+COMPOSER_NAMESPACES=never
+COMPOSER_AUTHENTICATION=true
+COMPOSER_MULTIUSER=true
+COMPOSER_PROVIDERS='{
+    "github": {
+        "provider": "github",
+        "module": "passport-github",
+        "clientID": "REPLACE_WITH_CLIENT_ID",
+        "clientSecret": "REPLACE_WITH_CLIENT_SECRET",
+        "authPath": "/auth/github",
+        "callbackURL": "/auth/github/callback",
+        "successRedirect": "/",
+        "failureRedirect": "/"
+    }
+}'
+COMPOSER_DATASOURCES='{
+    "db": {
+        "name": "db",
+        "connector": "mongodb",
+        "host": "mongo"
+    }
+}'
+docker run \
+    -d \
+    -e COMPOSER_CARD=${COMPOSER_CARD} \
+    -e COMPOSER_NAMESPACES=${COMPOSER_NAMESPACES} \
+    -e COMPOSER_AUTHENTICATION=${COMPOSER_AUTHENTICATION} \
+    -e COMPOSER_MULTIUSER=${COMPOSER_MULTIUSER} \
+    -e COMPOSER_PROVIDERS="${COMPOSER_PROVIDERS}" \
+    -e COMPOSER_DATASOURCES="${COMPOSER_DATASOURCES}" \
+    -v ~/.composer:/home/composer/.composer \
+    --name rest \
+    --network composer_default \
+    -p 3000:3000 \
+    myorg/my-composer-rest-server
+docker logs -f rest
+
+
+#######################################################
+# fabric  chaintool
+
+git clone  https://github.com/hyperledger/fabric-chaintool.git
+git clone  https://github.com/hyperledger/fabric-chaincode-java.git
+git clone  https://github.com/hyperledger/fabric-chaincode-node.git
+
+chaintool [general-options] action [action-options]
+  package -> Package the chaincode into a CAR file for deployment
+  ls -> List the contents of a CAR file
+  buildcar -> Build the chaincode project from a CAR file
+  inspect -> Retrieves metadata from a running instance
+  build -> Build the chaincode project
+  deps -> Download any missing dependencies for the project
+  env -> Display variables used in the build environment
+  proto -> Compiles a CCI file to a .proto
+  clean -> Clean the chaincode project
+  unpack -> Unpackage a CAR file
+
+
+#######################################################
+# fabric sdk 
+
+cd $GOPATH/src/github.com/hyperledger
+
+git clone   https://github.com/hyperledger/fabric-sdk-node.git
+git clone   https://github.com/hyperledger/fabric-sdk-py.git
+git clone   https://github.com/hyperledger/fabric-sdk-go.git
+git clone   https://github.com/hyperledger/fabric-sdk-java.git
+
+
+#######################################################
+# fabric  samples
+
+cd $GOPATH/src/github.com/hyperledger
+git clone  https://github.com/hyperledger/fabric-samples.git
+git clone  https://github.com/AliyunContainerService/solution-blockchain-demo.git
+
+git clone  https://github.com/hyperledger/fabric-baseimage.git
+git clone  https://github.com/hyperledger/fabric-test.git
+git clone  https://github.com/hyperledger/fabric-test-resources.git
+
+
+git clone  https://github.com/IBM-Blockchain/marbles.git
+git clone  https://github.com/binhn/marbles-chaincode.git
+git clone  https://github.com/IBM-Blockchain-Archive/cp-web.git
+
+
+
+#######################################################
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
